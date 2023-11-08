@@ -1,5 +1,5 @@
 
----?color=linear-gradient(100deg, white 50%, #1F6ED4 50.2%)
+---
 
 @snap[west span-40]
 # ![](https://zurich.impacthub.ch/wp-content/uploads/2018/02/womenplusplus_cmyk_onlight.png)
