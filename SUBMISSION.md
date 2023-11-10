@@ -35,7 +35,7 @@ Make your presentation and/or walkthrough
 
 Checklist:
 * [ ] PDF, PPTX or HTML for slides
-* [ ] Practise!
+* [ ] Practice!
 * [ ] Add to this repo
 
 ---
@@ -43,7 +43,7 @@ Checklist:
 # 3. Submit
 
 Checklist:
-* [ ] Add you code
+* [ ] Add your code
 * [ ] Add presentation
 * [ ] Add full names of team members!
 * [ ] Add `hnl2023` to the topics of the repo
