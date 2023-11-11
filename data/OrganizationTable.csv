@@ -1,0 +1,13 @@
+,Name,N_staff,N_volunteers,N_activities,Activity_id
+January,WomenPlusPlus,8,9,3,"[0, 1, 2]"
+February,WomenPlusPlus,8,9,3,"[0, 1, 2]"
+March,WomenPlusPlus,7,1,1,[0]
+April,WomenPlusPlus,9,4,1,[0]
+May,WomenPlusPlus,5,0,4,"[0, 1, 2, 3]"
+June,WomenPlusPlus,9,7,2,"[0, 1]"
+July,WomenPlusPlus,6,4,1,[0]
+August,WomenPlusPlus,9,8,2,"[0, 1]"
+September,WomenPlusPlus,8,6,2,"[0, 1]"
+October,WomenPlusPlus,8,3,5,"[0, 1, 2, 3, 4]"
+November,WomenPlusPlus,9,9,1,[0]
+December,WomenPlusPlus,10,0,4,"[0, 1, 2, 3]"
