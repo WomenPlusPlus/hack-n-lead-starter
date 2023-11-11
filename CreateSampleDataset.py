@@ -3,21 +3,6 @@ import pandas as pd
 import random
 from random import randint
 
-#%%
-fields = ['location'                    #city, country
-          ,'n_beneficiaries'            #dict[int per month]
-          ,'n_staff'                    #dict[int per month]
-          ,'n_volunteers'               #dict[int per month]
-          ,'n_activities'               #dict[int per month]
-          ,'tot_duration'               #dict[int per month]
-          ,'times_per_week'             #dict[int per month]  
-          ,'tot_cost'                   #dict[int per month]
-          ,'tot_budget'                 #dict[int per month]
-          ,'workhours'                  #dict[int per month]
-          ,'demo_beneficiaries'         #dict[dict per month]
-          ,'demo_staff'                 #dict[dict per month]
-          ,'demo_volunteers'            #dict[dict per month]
-          ]
 
 #%%
 random.seed(1)
@@ -28,34 +13,51 @@ months = ['January', 'February', 'March', 'April','May', 'June'
 #%%
 n_activities = {month: randint(1, 5) for month in months}
 
+#%%
+def GetNSupporterEnterprises():
+    supporters = [4,5,8,8,9,9,12,14,15,15,18,20]
+    supporter_dic = {}
+    for i,month in enumerate(months):
+        print(i, month)
+        supporter_dic[month] = supporters[i]
+    return supporter_dic
+
+GetNSupporterEnterprises()
+
+#%%
+def GetTotContributions():
+    contribution_dic = {}
+    random.seed(1)
+    for i,month in enumerate(months):
+        print(i, month)
+        nsup = GetNSupporterEnterprises()[month]
+        contribution=0
+        for n in range(0,nsup):
+            contribution+=2000*random.random()
+        contribution_dic[month] = contribution
+    return contribution_dic
+
+GetTotContributions()
+
 #%%                
 dict_org = {'Name': 'WomenPlusPlus'
             , 'N_staff': {month: randint(5, 10) for month in months}
+            , 'N_Esupporters': GetNSupporterEnterprises()
+            , 'Tot_Contribution (CHF)': GetTotContributions()
             , 'N_volunteers': {month: randint(0, 10) for month in months}
             ,'N_activities': n_activities
             ,'Activity_id': {month:[i for i in range(0,n_activities[month])] for month in months}
             }
 
+
 print(dict_org)
 # %%
 df_org = pd.DataFrame.from_dict(dict_org)
+df_org.index.name='Month'
 df_org.head()
 # %%
 df_org.to_csv("data/OrganizationTable.csv")
 
-# %%
-#activities = [{'id': 0
-#                 ,'Activity_name':'hackaton'
-#                 ,'Tot. duration (hours)': 48
-#                 ,'Times_per_week':4
-#                 ,'Tot_budget':10000
-#                 ,'Tot_cost':8735
-#                 ,'n_volunteers':10
-#                 ,'n_staff':4
-#                 ,'n_beneficiaries':120
-#                 ,'beneficieary_id':[i for i in range(0,120)]
-#                ,'n_waitlist': 40
-#                 }]
 
 #%%
 activities_names = ['hackaton', 'workshop','networking','deploy(impact)','coffee']
@@ -85,12 +87,30 @@ def getParticipantID(nmax, npart):
         while(check=='True'):
             rnd =  randint(0,nmax)
             check = checkPartID(partID, rnd)    
-        partID[i] = rnd
-            
+        partID[i] = rnd    
     return partID
 
 partID = getParticipantID(nmax,npart)
 print(partID)
+
+#%%
+def DefineDropOut(act_id):
+    rnd = random.uniform(0,1)
+    threshold={'0':0.7,'1':0.9,'2':0.85,'3':0.85,'4':0.9}
+    if rnd<threshold[str(act_id)]:
+        return 0 #Not dropped-out
+    if rnd>=threshold[str(act_id)]:
+        return 1 #Dropped-out
+    
+def GetParticipantDropOut(npart, act_id):
+    partDO = [-99]*npart
+    for i in range(0,npart):
+        partDO[i] = DefineDropOut(act_id)
+    return partDO
+
+#%%
+avg_participation = [0.77,0.82,0.93,0.94,0.95]
+    
 #%%
 activities = []
 for i in range(0,5):
@@ -101,11 +121,13 @@ for i in range(0,5):
     activity['times_per_week'] = activities_tperw[i]
     activity['Tot_budget'] = activities_budget[i]
     activity['Tot_cost'] = activities_cost[i]
-    activity['n_beneficiaries'] = activities_npart[i]
+    #activity['n_beneficiaries'] = activities_npart[i]
     activity['n_volunteers'] = activities_nvolunteers[i]
     activity['n_staff'] = activities_nstaff[i]
     activity['n_waitlist'] = activities_nwaitlist[i]
-    activity['beneficieary_id'] = getParticipantID(nmax, activities_npart[i])
+    activity['beneficiary_id'] = getParticipantID(nmax, activities_npart[i])
+    activity['beneficiary_dropout'] = GetParticipantDropOut(activities_npart[i],i)
+    activity['average_participation'] = avg_participation[i]
     activities.append(activity)
     
 
@@ -158,6 +180,52 @@ def getEmploymentStatus():
         return 'Unemployed'
 
 #%%
+start_fields = {'Business':0.1,'Construction':0.01,'Education':0.13,'Engineering':0.1,'Farming':0.01,'Health':0.02,'Hospitality':0.04,'Law':0.02,'Management':0.02,'Media':0.05,'Administration':0.02,'Science':0.18,'IT':0.3}
+end_fields = {'Business':0.09,'Construction':0.008,'Education':0.09,'Engineering':0.05,'Farming':0.009,'Health':0.018,'Hospitality':0.036,'Law':0.016,'Management':0.02,'Media':0.046,'Administration':0.019,'Science':0.14,'IT':0.458}
+
+def check_sum_to_one(di):
+    sum = 0
+    for key in di.keys():
+        sum+=di[key]
+    print(sum)
+    return
+
+check_sum_to_one(start_fields)
+check_sum_to_one(end_fields)
+#%%
+def getStartField(start_fields):
+    rnd = random.uniform(0,1)
+    #print(rnd)
+    thr = [0]*(len(start_fields)+1)
+    for i,key in enumerate(start_fields):
+        thr[i+1]=thr[i]+start_fields[key]
+    #print(thr)
+    for i,key in enumerate(start_fields):
+        if rnd>thr[i] and rnd<=thr[i+1]:
+            #print(rnd, thr[i],thr[i+1])
+            return key
+        
+
+getStartField(start_fields)
+#%%
+def getEndField(start,start_fields,end_fields):
+    end = ''
+    if start!='IT':
+        rnd = random.uniform(0,1)
+        ratio = end_fields[start]/start_fields[start]
+        print(ratio)
+        if rnd<=1-ratio:
+            end = 'IT'
+        else:
+            end = start
+    else:
+        end = start
+    return end
+
+
+
+
+#%%
 #Generate participants
 participants = []
 for i in range(0,nmax):
@@ -167,6 +235,8 @@ for i in range(0,nmax):
     participant['age'] = getAge()
     participant['education'] = getEducation()
     participant['employment_status'] = getEmploymentStatus()
+    participant['start_field'] = getStartField(start_fields)
+    participant['end_field'] = getEndField(participant['start_field'],start_fields,end_fields)
     participants.append(participant)
     
 # %%
@@ -174,3 +244,4 @@ df_part = pd.DataFrame.from_dict(participants)
 df_part.head()
 # %%
 df_part.to_csv("data/ParticipantsTable.csv")
+# %%
