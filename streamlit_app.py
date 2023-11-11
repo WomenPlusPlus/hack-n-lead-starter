@@ -19,9 +19,17 @@ path = st.text_input('Target area (Food, Education, Poverty)')
 st.text('Provide a CSV data set, making sure ')
 st.header("Data Exploration")
 
-path = st.text_input('CSV file path')
-if path:
-    mpg_df_raw = load_data(path=path)
-    mpg_df = deepcopy(mpg_df_raw)
+# path = st.text_input('CSV file path')
+uploaded_file = st.file_uploader("Choose your data set file")
+
+if uploaded_file:
+    ngo_df_raw = pd.read_csv(uploaded_file)
+    ngo_df = deepcopy(ngo_df_raw)
 
 
+if st.checkbox("Show Dataframe"):
+    st.subheader("This is my dataset:")
+    st.dataframe(data=ngo_df)
+
+st.header("Your impact measure")
+st.text('Charts and fun dashboards')
