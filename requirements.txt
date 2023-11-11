@@ -1,0 +1,7 @@
+langchain==0.0.317
+openai==0.28.1
+tiktoken==0.5.1
+qdrant-client==1.6.3
+streamlit==1.27.2
+sentence-transformers==2.2.2
+pydantic==1.10.8
