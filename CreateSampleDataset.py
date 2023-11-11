@@ -2,18 +2,24 @@
 import pandas as pd
 import random
 from random import randint
+#from Parameters import *
 
-
-#%%
-random.seed(1)
-
-#%%
+TotBeneficiaries = 2000
 months = ['January', 'February', 'March', 'April','May', 'June'
           , 'July','August','September','October', 'November', 'December']
-#%%
-n_activities = {month: randint(1, 5) for month in months}
 
-#%%
+years = ['2022','2023']
+
+n_max_activity_year = {'2022':3,'2023':5}
+activities_names = ['hackaton', 'workshop','networking','deploy(impact)','coffee']
+
+# Seed for reproducibility
+random.seed(1)
+
+# Generate number of activities for each month
+n_activities = {month: random.randint(1, 5) for month in months}
+
+# Helper function to get supporter enterprises
 def GetNSupporterEnterprises():
     supporters = [4,5,8,8,9,9,12,14,15,15,18,20]
     supporter_dic = {}
@@ -22,10 +28,8 @@ def GetNSupporterEnterprises():
         supporter_dic[month] = supporters[i]
     return supporter_dic
 
-GetNSupporterEnterprises()
-
-#%%
-def GetTotContributions():
+# Helper function to get total donations
+def GetTotDonations():
     contribution_dic = {}
     random.seed(1)
     for i,month in enumerate(months):
@@ -37,30 +41,24 @@ def GetTotContributions():
         contribution_dic[month] = contribution
     return contribution_dic
 
-GetTotContributions()
-
-#%%                
+# Organization table
 dict_org = {'Name': 'WomenPlusPlus'
             , 'N_staff': {month: randint(5, 10) for month in months}
             , 'N_Esupporters': GetNSupporterEnterprises()
-            , 'Tot_Contribution (CHF)': GetTotContributions()
+            , 'Tot_Donations (CHF)': GetTotDonations()
             , 'N_volunteers': {month: randint(0, 10) for month in months}
             ,'N_activities': n_activities
             ,'Activity_id': {month:[i for i in range(0,n_activities[month])] for month in months}
             }
 
-
-print(dict_org)
-# %%
 df_org = pd.DataFrame.from_dict(dict_org)
 df_org.index.name='Month'
 df_org.head()
-# %%
 df_org.to_csv("data/OrganizationTable.csv")
 
 
 #%%
-activities_names = ['hackaton', 'workshop','networking','deploy(impact)','coffee']
+# Activities table
 activities_duration = [144,80,10,72,2]
 activities_tperw = [3,1,1,3,1]
 activities_budget = [20000,12000,5000,12000,500]
@@ -69,10 +67,8 @@ activities_npart = [120,50,100,60,18]
 activities_nwaitlist = [20,10,1,12,0]
 activities_nvolunteers = [8,5,4,8,5]
 activities_nstaff = [5,6,6,6,2]
-#%%
-nmax = 200
-npart = 30
-    
+
+#%%    
 def checkPartID(partID, rnd):
     if rnd in partID:
         return 'True'
@@ -89,9 +85,6 @@ def getParticipantID(nmax, npart):
             check = checkPartID(partID, rnd)    
         partID[i] = rnd    
     return partID
-
-partID = getParticipantID(nmax,npart)
-print(partID)
 
 #%%
 def DefineDropOut(act_id):
@@ -125,7 +118,7 @@ for i in range(0,5):
     activity['n_volunteers'] = activities_nvolunteers[i]
     activity['n_staff'] = activities_nstaff[i]
     activity['n_waitlist'] = activities_nwaitlist[i]
-    activity['beneficiary_id'] = getParticipantID(nmax, activities_npart[i])
+    activity['beneficiary_id'] = getParticipantID(TotBeneficiaries, activities_npart[i])
     activity['beneficiary_dropout'] = GetParticipantDropOut(activities_npart[i],i)
     activity['average_participation'] = avg_participation[i]
     activities.append(activity)
@@ -228,7 +221,7 @@ def getEndField(start,start_fields,end_fields):
 #%%
 #Generate participants
 participants = []
-for i in range(0,nmax):
+for i in range(0,TotBeneficiaries):
     participant = {}
     participant['id'] = i
     participant['gender'] = getGender()
@@ -239,9 +232,24 @@ for i in range(0,nmax):
     participant['end_field'] = getEndField(participant['start_field'],start_fields,end_fields)
     participants.append(participant)
     
-# %%
 df_part = pd.DataFrame.from_dict(participants)
 df_part.head()
-# %%
 df_part.to_csv("data/ParticipantsTable.csv")
+# %%
+
+
+
+df_org_dummy = df_org.explode('Activity_id')
+print(df_org_dummy)
+
+df_act_dummy = df_act.explode(['beneficiary_id','beneficiary_dropout']).reset_index(drop=True)
+
+#%%
+def MergeTables(df_org, df_act, df_part):
+    df_1 = pd.merge(df_org, df_act, how="left", left_on="Activity_id",right_on= "id")
+    df_tot = pd.merge(df_1, df_part, how="left", left_on="beneficiary_id", right_on = "id")
+    return df_tot
+
+df_tot = MergeTables(df_org_dummy, df_act_dummy, df_part)
+df_tot.to_csv("data/TotTable.csv")
 # %%

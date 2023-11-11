@@ -1,4 +1,4 @@
-Month,Name,N_staff,N_Esupporters,Tot_Contribution (CHF),N_volunteers,N_activities,Activity_id
+Month,Name,N_staff,N_Esupporters,Tot_Donations (CHF),N_volunteers,N_activities,Activity_id
 January,WomenPlusPlus,8,4,4001.2832515313394,7,2,"[0, 1]"
 February,WomenPlusPlus,10,5,4958.20412502638,5,5,"[0, 1, 2, 3, 4]"
 March,WomenPlusPlus,7,8,6913.910463644038,7,1,[0]
