@@ -3,6 +3,7 @@ import pandas as pd
 import random
 from random import randint
 #from Parameters import *
+from MergeDatasets import *
 
 TotBeneficiaries = 2000
 months = ['January', 'February', 'March', 'April','May', 'June'
@@ -17,35 +18,59 @@ activities_names = ['hackaton', 'workshop','networking','deploy(impact)','coffee
 random.seed(1)
 
 # Generate number of activities for each month
-n_activities = {month: random.randint(1, 5) for month in months}
+n_activities =[random.randint(1, 5) for month in months]
 
-# Helper function to get supporter enterprises
-def GetNSupporterEnterprises():
-    supporters = [4,5,8,8,9,9,12,14,15,15,18,20]
-    supporter_dic = {}
-    for i,month in enumerate(months):
-        print(i, month)
-        supporter_dic[month] = supporters[i]
-    return supporter_dic
-
-# Helper function to get total donations
-def GetTotDonations():
-    contribution_dic = {}
+# Helper function to Generate supporter enterprises
+def GenerateNSupporterEnterprises(months,n_activities):
     random.seed(1)
-    for i,month in enumerate(months):
-        print(i, month)
-        nsup = GetNSupporterEnterprises()[month]
+    supporters = [0]*len(months)
+    for i in range(len(months)):
+        if i==0: 
+            supporters[i]=randint(1,5)
+        else:
+            supporters[i]=round(supporters[i-1]+(n_activities[i]*0.5),0)
+    return supporters
+
+#print(GenerateNSupporterEnterprises(months,n_activities))
+#%%
+# Helper function to Generate total donations
+def GenerateTotDonations(months,n_activities):
+    random.seed(1)
+    contributions = [0]*len(months)
+    nsup = GenerateNSupporterEnterprises(months,n_activities)
+    for i in range(len(months)):
         contribution=0
-        for n in range(0,nsup):
+        for n in range(0,int(nsup[i])):
             contribution+=2000*random.random()
-        contribution_dic[month] = contribution
-    return contribution_dic
+        contributions[i] = round(contribution,0)
+    return contributions
+
+def GenerateActivityID(months, n_activities):
+    act_id = [0]*len(months)
+    for j in range(len(months)):
+        act_id[j] = []
+        for i in range(n_activities[j]):
+             act_id[j].append(i)
+    return act_id
 
 # Organization table
-dict_org = {'Name': 'WomenPlusPlus'
-            , 'N_staff': {month: randint(5, 10) for month in months}
-            , 'N_Esupporters': GetNSupporterEnterprises()
-            , 'Tot_Donations (CHF)': GetTotDonations()
+staff_data = {
+    'Month': months
+    ,'N_staff': [random.randint(5, 10) for _ in range(len(months))]
+    ,'Tot_Donations (CHF)': GenerateTotDonations(months,n_activities)
+    ,'N_Esupporters':GenerateNSupporterEnterprises(months,n_activities)
+    , 'N_volunteers':[randint(0, 10) for i in range(len(months))]
+    ,'N_activities': n_activities
+    ,'Activity_id':GenerateActivityID(months, n_activities)
+}
+df_org = pd.DataFrame.from_dict(staff_data)
+df_org.head()
+df_org.to_csv("data/OrganizationTable.csv")
+#%%
+'''
+dict_org = {'N_staff': {month: randint(5, 10) for month in months}
+            , 'N_Esupporters': GenerateNSupporterEnterprises()
+            , 'Tot_Donations (CHF)': GenerateTotDonations()
             , 'N_volunteers': {month: randint(0, 10) for month in months}
             ,'N_activities': n_activities
             ,'Activity_id': {month:[i for i in range(0,n_activities[month])] for month in months}
@@ -55,6 +80,7 @@ df_org = pd.DataFrame.from_dict(dict_org)
 df_org.index.name='Month'
 df_org.head()
 df_org.to_csv("data/OrganizationTable.csv")
+'''
 
 
 #%%
@@ -75,7 +101,7 @@ def checkPartID(partID, rnd):
     else:
         return 'False'
     
-def getParticipantID(nmax, npart):
+def GenerateParticipantID(nmax, npart):
     partID = [-99]*npart
     for i in range(npart):
         rnd =  randint(0,nmax)
@@ -95,7 +121,7 @@ def DefineDropOut(act_id):
     if rnd>=threshold[str(act_id)]:
         return 1 #Dropped-out
     
-def GetParticipantDropOut(npart, act_id):
+def GenerateParticipantDropOut(npart, act_id):
     partDO = [-99]*npart
     for i in range(0,npart):
         partDO[i] = DefineDropOut(act_id)
@@ -118,8 +144,8 @@ for i in range(0,5):
     activity['n_volunteers'] = activities_nvolunteers[i]
     activity['n_staff'] = activities_nstaff[i]
     activity['n_waitlist'] = activities_nwaitlist[i]
-    activity['beneficiary_id'] = getParticipantID(TotBeneficiaries, activities_npart[i])
-    activity['beneficiary_dropout'] = GetParticipantDropOut(activities_npart[i],i)
+    activity['beneficiary_id'] = GenerateParticipantID(TotBeneficiaries, activities_npart[i])
+    activity['beneficiary_dropout'] = GenerateParticipantDropOut(activities_npart[i],i)
     activity['average_participation'] = avg_participation[i]
     activities.append(activity)
     
@@ -130,7 +156,7 @@ df_act.head()
 # %%
 df_act.to_csv("data/ActivitiesTable.csv")
 # %%
-def getGender():
+def GenerateGender():
     rnd = random.uniform(0,1)
     if rnd<0.7:
         return 'F'
@@ -141,7 +167,7 @@ def getGender():
     if rnd>0.95:
         return 'NS'
 
-def getAge():
+def GenerateAge():
     rnd = random.uniform(0,1)
     if rnd<0.2:
         return randint(20,30)
@@ -154,7 +180,7 @@ def getAge():
     if rnd>=0.97:
         return randint(60,90)
 
-def getEducation():
+def GenerateEducation():
     rnd = random.uniform(0,1)
     if rnd<0.1:
         return 'HighSchool'
@@ -165,7 +191,7 @@ def getEducation():
     if rnd>=0.75:
         return 'PhD'
     
-def getEmploymentStatus():
+def GenerateEmploymentStatus():
     rnd = random.uniform(0,1)
     if rnd<0.5:
         return 'Employed'
@@ -183,10 +209,10 @@ def check_sum_to_one(di):
     print(sum)
     return
 
-check_sum_to_one(start_fields)
-check_sum_to_one(end_fields)
+#check_sum_to_one(start_fields)
+#check_sum_to_one(end_fields)
 #%%
-def getStartField(start_fields):
+def GenerateStartField(start_fields):
     rnd = random.uniform(0,1)
     #print(rnd)
     thr = [0]*(len(start_fields)+1)
@@ -199,14 +225,14 @@ def getStartField(start_fields):
             return key
         
 
-getStartField(start_fields)
+GenerateStartField(start_fields)
 #%%
-def getEndField(start,start_fields,end_fields):
+def GenerateEndField(start,start_fields,end_fields):
     end = ''
     if start!='IT':
         rnd = random.uniform(0,1)
         ratio = end_fields[start]/start_fields[start]
-        print(ratio)
+        #print(ratio)
         if rnd<=1-ratio:
             end = 'IT'
         else:
@@ -224,32 +250,17 @@ participants = []
 for i in range(0,TotBeneficiaries):
     participant = {}
     participant['id'] = i
-    participant['gender'] = getGender()
-    participant['age'] = getAge()
-    participant['education'] = getEducation()
-    participant['employment_status'] = getEmploymentStatus()
-    participant['start_field'] = getStartField(start_fields)
-    participant['end_field'] = getEndField(participant['start_field'],start_fields,end_fields)
+    participant['gender'] = GenerateGender()
+    participant['age'] = GenerateAge()
+    participant['education'] = GenerateEducation()
+    participant['employment_status'] = GenerateEmploymentStatus()
+    participant['start_field'] = GenerateStartField(start_fields)
+    participant['end_field'] = GenerateEndField(participant['start_field'],start_fields,end_fields)
     participants.append(participant)
     
 df_part = pd.DataFrame.from_dict(participants)
 df_part.head()
 df_part.to_csv("data/ParticipantsTable.csv")
-# %%
 
-
-
-df_org_dummy = df_org.explode('Activity_id')
-print(df_org_dummy)
-
-df_act_dummy = df_act.explode(['beneficiary_id','beneficiary_dropout']).reset_index(drop=True)
-
-#%%
-def MergeTables(df_org, df_act, df_part):
-    df_1 = pd.merge(df_org, df_act, how="left", left_on="Activity_id",right_on= "id")
-    df_tot = pd.merge(df_1, df_part, how="left", left_on="beneficiary_id", right_on = "id")
-    return df_tot
-
-df_tot = MergeTables(df_org_dummy, df_act_dummy, df_part)
-df_tot.to_csv("data/TotTable.csv")
+MergeTables(df_org, df_act, df_part)
 # %%
