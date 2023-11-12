@@ -51,4 +51,33 @@ def CreateTableChangeRatio():
     pivot_df['ratio_change (%)']= pivot_df['ratio_change (%)'].fillna(0)
     return pivot_df
 
+
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+
+
+def CreateCompaniesPlot():
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+    # Bar chart
+    fig.add_trace(go.Bar(x=df['org']['Month'], y=df['org']['N_activities'], marker_color='blue', name='N activities',
+                         marker=dict(color='red')), secondary_y=False)
+
+    # Line chart
+    fig.add_trace(go.Scatter(x=df['org']['Month'], y=df['org']['N_Esupporters'], marker_color='blue',
+                             name='N supporting companies', mode='lines'), secondary_y=False)
+
+    # Update layout
+    fig.update_layout(title_text='Companies and Activities Over Months', xaxis_title='Month',
+                      yaxis_title='Number of Companies', yaxis2_title='Number of Activities')
+
+    # Update axes
+    fig.update_yaxes(title_text='Number of Companies', secondary_y=False)
+    fig.update_yaxes(title_text='Number of Activities', secondary_y=True)
+
+    return fig
+
+
+# CreateCompaniesPlot(df).show()
+
 # PlotGenderDistributionPerMonth(df).show()
