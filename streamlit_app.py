@@ -4,7 +4,7 @@ import plotly.express as px
 from copy import deepcopy
 import matplotlib.pyplot as plt
 from PIL import Image
-
+import Dashboard
 NGO_name =''
 
 # Function to display sidebar and handle file upload
@@ -119,8 +119,12 @@ def main():
         st.pyplot(end_field_chart)
 
 
+
         # Visualizations
         plot_visualizations(ngo_df, NGO_name)
+
+        fig = Dashboard.PlotGenderDistributionPerMonth()
+        st.plotly_chart(fig)
 
 
 def plot_visualizations(ngo_df, NGO_name):
