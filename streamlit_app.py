@@ -18,7 +18,7 @@ def side_bar():
     if logo_file:
         image = Image.open(logo_file)
         st.image(image)
-        
+
     st.title(f"{NGO_name} Impact Measure")
 
     st.sidebar.text_input("Target area (Food, Education, Poverty)")
@@ -108,23 +108,29 @@ def main():
         # st.pyplot(end_field_chart)
 
         # Visualizations
-        plot_visualizations(ngo_df, NGO_name)
+        plot_visualizations(ngo_df, participant_df, NGO_name)
 
 
-def plot_visualizations(ngo_df, NGO_name):
+def plot_visualizations(ngo_df, participant_df, NGO_name):
+    # Data aggregation for career changes
+    start_field_count = participant_df.groupby(["start_field"])["start_field"].count()
+    end_field_count = participant_df.groupby(["end_field"])["end_field"].count()
+    transitions_df = pd.DataFrame([start_field_count, end_field_count]).T
+    transitions_df.rename({"start_field": "before", "end_field": "after"}, axis=1, inplace=True)
+
     row1_col1, row1_col2 = st.columns(2)
     row2_col1, row2_col2 = st.columns(2)
 
     # 1. Line Graph for Staff and Volunteers Over Time
     row1_col1.subheader(f"Staff and Volunteers Over Time {NGO_name}")
     fig1 = px.line(ngo_df, x="Month", y=["N_staff", "N_volunteers"])
-    # st.plotly_chart(fig1)
+    fig1.update_layout(legend_title=None)
     row1_col1.plotly_chart(fig1)
 
     # 2. Bar Chart for Number of Activities Each Month
     row1_col2.subheader("Number of Activities Each Month")
     fig2 = px.bar(ngo_df, x="Month", y="N_activities")
-    # st.plotly_chart(fig2)
+    fig2.update_layout(legend_title=None)
     row1_col2.plotly_chart(fig2)
 
     # 3. Box Plot for Staff and Volunteer Variability
@@ -135,8 +141,20 @@ def plot_visualizations(ngo_df, NGO_name):
     # 4. Stacked Bar Chart for Staff and Volunteers
     row2_col1.subheader("Staff and Volunteers Each Month")
     fig4 = px.bar(ngo_df, x="Month", y=["N_staff", "N_volunteers"], barmode="stack")
+    fig4.update_layout(legend_title=None)
     row2_col1.plotly_chart(fig4)
 
+    row2_col2.subheader("Career Transitions by Industry")
+    fig6 = px.bar(
+        transitions_df,
+        x=transitions_df.index,
+        y=["before", "after"],
+        barmode="group",
+    )
+    fig6.update_layout(
+        legend_title=None, xaxis_title="Industry", yaxis_title="# Participants"
+    )
+    row2_col2.plotly_chart(fig6)
     # 5. Scatter Plot for Staff vs. Volunteers
     # st.subheader("Staff vs. Volunteers")
     # fig5 = px.scatter(ngo_df, x="N_staff", y="N_volunteers")
