@@ -134,6 +134,11 @@ def main():
         plot_visualizations(ngo_df, NGO_name)
 
         fig = Dashboard.PlotGenderDistributionPerMonth()
+        if st.checkbox('Ratio in the profession change'):
+            # Display the result
+            table = Dashboard.CreateTableChangeRatio()
+            table
+
         st.plotly_chart(fig)
 
 
@@ -176,6 +181,8 @@ def create_pie_chart(data_frame, column, title):
     plt.pie(count, labels=count.index, autopct="%1.1f%%")
     plt.title(title)
     return plt
+
+
 
 
 st.set_page_config(layout="wide")

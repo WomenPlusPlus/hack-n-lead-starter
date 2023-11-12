@@ -39,4 +39,16 @@ def PlotGenderDistributionPerMonth():
     fig = px.line(grouped_df, x="Month", y="counts", title='Gender distributions/Month', color='gender')
     return fig
 
+
+def CreateTableChangeRatio():
+    df['tot']['status_change']= (df['tot']['start_field']!=(df['tot']['end_field']))
+
+    grouped_df = df['tot'].groupby(['start_field','status_change'])['status_change'].count().reset_index(name='counts')
+    grouped_df_2 = grouped_df.groupby(['start_field', 'status_change']).agg({'counts': 'sum'}).reset_index()
+    pivot_df = grouped_df_2.pivot(index='start_field', columns='status_change', values='counts').reset_index()
+    # Calculate the ratio
+    pivot_df['ratio_change (%)'] = round(pivot_df[True]*100 / (pivot_df[True] + pivot_df[False]),2)
+    pivot_df['ratio_change (%)']= pivot_df['ratio_change (%)'].fillna(0)
+    return pivot_df
+
 # PlotGenderDistributionPerMonth(df).show()
