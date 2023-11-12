@@ -6,35 +6,51 @@ import plotly.graph_objects as go
 from urllib.request import urlopen
 import json
 from copy import deepcopy
+ngo_df = pd.DataFrame()
+def side_bar():
+
+    st.sidebar.title("CSV Data Upload for Organization and Activities")
+
+    st.sidebar.header("Upload your CSV Data File")
+    st.sidebar.write("Please upload a CSV file containing the following fields:")
+    st.sidebar.write("1. location (city, country)")
+    st.sidebar.write(
+        "2. n_beneficiaries, n_staff, n_volunteers, n_activities, tot_duration, times_per_week, tot_cost, tot_budget, workhours (as dictionaries for each month)")
+    st.sidebar.write("3. demo_beneficiaries, demo_staff, demo_volunteers (as nested dictionaries for each month)")
+    # Add other required fields descriptions
+    # Add title and header
+
+    # request_data()
+
+    # path = st.sidebartext_input('CSV file path')
+    uploaded_file = st.sidebar.file_uploader("Choose your data set file")
+
+    if uploaded_file:
+        ngo_df_raw = pd.read_csv(uploaded_file)
+        ngo_df = deepcopy(ngo_df_raw)
+        # ngo_df
+    else:
+        # this is not relevant, but i added otherwise, the app shows an error until the data file is uplaoded
+        ngo_df_raw = pd.read_csv('data/OrganizationTable.csv')
+        ngo_df = deepcopy(ngo_df_raw)
+        ngo_df
+    return ngo_df
 @st.cache_data
 def load_data(path):
     df = pd.read_csv(path)
     return df
 
 
-# Add title and header
 st.title("Estimate Impact of your NGO project!")
 NGO_name = path = st.text_input('NGO name')
 path = st.text_input('Target area (Food, Education, Poverty)')
-st.text('Provide a CSV data set, making sure ')
+st.text('Provide a CSV data set on the right')
+
+
+# Open Credentials
+ngo_df = side_bar()
+
 st.header("Data Exploration")
-
-# path = st.text_input('CSV file path')
-uploaded_file = st.file_uploader("Choose your data set file")
-
-if uploaded_file:
-    ngo_df_raw = pd.read_csv(uploaded_file)
-    ngo_df = deepcopy(ngo_df_raw)
-    # ngo_df
-else:
-    ngo_df_raw = pd.read_csv('data/OrganizationTable.csv')
-    ngo_df = deepcopy(ngo_df_raw)
-    # ngo_df
-
-if st.checkbox("Show Dataframe"):
-    st.subheader("This is my dataset:")
-    st.dataframe(data=ngo_df)
-
 st.header(f"{NGO_name} impact measure")
 st.text('Charts and fun dashboards')
 
