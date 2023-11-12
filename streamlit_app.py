@@ -6,16 +6,25 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 NGO_name =''
+
 # Function to display sidebar and handle file upload
 
 def side_bar():
+    st.markdown(f'''
+        <style>
+        section[data-testid="stSidebar"] .css-ng1t4o {{width: 40rem;}}
+        </style>
+    ''', unsafe_allow_html=True)
     st.sidebar.title("Tell us about your NGO project")
 
     NGO_name = st.sidebar.text_input('NGO name')
 
-    st.title(f"{NGO_name} Impact Measure")
 
     st.sidebar.text_input('Target area (Food, Education, Poverty)')
+
+    impact_value = st.sidebar.text_input('Key values for the impact [leave empty if unsure]')
+
+    st.title(f"{NGO_name} Impact Measure \n {impact_value}")
 
     logo_file = st.sidebar.file_uploader("Your company logo")
     if logo_file:
@@ -36,7 +45,7 @@ def side_bar():
         st.write("3. demo_beneficiaries, demo_staff, demo_volunteers (as nested dictionaries for each month)")
 
         st.write("Upload one CSV file about your pariticapants, containing:")
-        st.write("1. ,id,gender,age,education,employment_status,start_field,end_field")
+        st.write("1. id,gender,age,education,employment_status")
         st.write("2. start_field,end_field")
 
 
@@ -58,6 +67,8 @@ def side_bar():
             mime='text/csv',
         )
 
+    st.sidebar.text_input('Parameters in data set for your impact '
+                          '[if Empty, then default is used]')
 
 
 def upload_files():
@@ -86,10 +97,14 @@ def main():
     # Load data from sidebar
     side_bar()
     ngo_df, participant_df = upload_files()
+    #
+    # if st.checkbox('Show data'):
+    #     ngo_df
+    #     participant_df
 
-    if st.sidebar.checkbox('Show data'):
+    if st.sidebar.checkbox('Analyse data'):
         # Data Exploration Section
-        st.header("Data Exploration")
+        # st.header("Data Exploration")
 
         # Creating a pie chart for gender distribution
         gender_pie = create_pie_chart(participant_df, 'gender', 'Gender Distribution')
