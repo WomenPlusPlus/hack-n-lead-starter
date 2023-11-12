@@ -7,6 +7,7 @@ from PIL import Image
 
 NGO_name =''
 # Function to display sidebar and handle file upload
+
 def side_bar():
     st.sidebar.title("Tell us about your NGO project")
 
@@ -56,12 +57,17 @@ def side_bar():
             file_name='data/ParticipantsTable.csv',
             mime='text/csv',
         )
+
+
+
+def upload_files():
     # File uploader
+    # ngo_df_raw = False
+    # participant_df_raw = False
     uploaded_file = st.sidebar.file_uploader("Choose Organisation data set file")
     if uploaded_file:
         ngo_df_raw = pd.read_csv(uploaded_file)
     else:
-        # Load default data if no file is uploaded
        ngo_df_raw = pd.read_csv('data/OrganizationTable.csv')
 
     uploaded_file = st.sidebar.file_uploader("Choose Participant data set file")
@@ -70,7 +76,6 @@ def side_bar():
     else:
         # Load default data if no file is uploaded
         participant_df_raw = pd.read_csv('data/ParticipantsTable.csv')
-
     return deepcopy(ngo_df_raw), deepcopy(participant_df_raw)
 
 # Main application
@@ -79,27 +84,28 @@ def main():
 
 
     # Load data from sidebar
-    ngo_df, participant_df = side_bar()
+    side_bar()
+    ngo_df, participant_df = upload_files()
+
+    if st.sidebar.checkbox('Show data'):
+        # Data Exploration Section
+        st.header("Data Exploration")
+
+        # Creating a pie chart for gender distribution
+        gender_pie = create_pie_chart(participant_df, 'gender', 'Gender Distribution')
+        # Display the pie chart in Streamlit
+        st.pyplot(gender_pie)
+
+        filtered_data = participant_df[participant_df['gender'] != 'M']
+        start_field_chart = create_pie_chart(filtered_data, 'start_field', 'Employment by Start Field (Excluding Males)')
+        end_field_chart = create_pie_chart(filtered_data, 'end_field', 'Employment by End Field (Excluding Males)')
+
+        st.pyplot(start_field_chart)
+        st.pyplot(end_field_chart)
 
 
-    # Data Exploration Section
-    st.header("Data Exploration")
-
-    # Creating a pie chart for gender distribution
-    gender_pie = create_pie_chart(participant_df, 'gender', 'Gender Distribution')
-    # Display the pie chart in Streamlit
-    st.pyplot(gender_pie)
-
-    filtered_data = participant_df[participant_df['gender'] != 'M']
-    start_field_chart = create_pie_chart(filtered_data, 'start_field', 'Employment by Start Field (Excluding Males)')
-    end_field_chart = create_pie_chart(filtered_data, 'end_field', 'Employment by End Field (Excluding Males)')
-
-    st.pyplot(start_field_chart)
-    st.pyplot(end_field_chart)
-
-
-    # Visualizations
-    plot_visualizations(ngo_df, NGO_name)
+        # Visualizations
+        plot_visualizations(ngo_df, NGO_name)
 
 
 def plot_visualizations(ngo_df, NGO_name):
