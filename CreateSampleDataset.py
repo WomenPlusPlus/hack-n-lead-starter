@@ -59,7 +59,7 @@ staff_data = {
     ,'N_staff': [random.randint(5, 10) for _ in range(len(months))]
     ,'Tot_Donations (CHF)': GenerateTotDonations(months,n_activities)
     ,'N_Esupporters':GenerateNSupporterEnterprises(months,n_activities)
-    , 'N_volunteers':[randint(0, 10) for i in range(len(months))]
+    , 'N_volunteers':[randint(4, 15) for i in range(len(months))]
     ,'N_activities': n_activities
     ,'Activity_id':GenerateActivityID(months, n_activities)
 }
@@ -85,13 +85,13 @@ df_org.to_csv("data/OrganizationTable.csv")
 
 #%%
 # Activities table
-activities_duration = [144,80,10,72,2]
-activities_tperw = [3,1,1,3,1]
+activities_duration = [24,4,10,2,2]
+activities_tperw = [2,1,1,3,1]
 activities_budget = [20000,12000,5000,12000,500]
 activities_cost = [18000,9034,3250,11060,450]
-activities_npart = [120,50,100,60,18]
+activities_npart = [120,50,100,60,20]
 activities_nwaitlist = [20,10,1,12,0]
-activities_nvolunteers = [8,5,4,8,5]
+activities_nvolunteers = [6,4,3,6,4]
 activities_nstaff = [5,6,6,6,2]
 
 #%%    
@@ -131,30 +131,72 @@ def GenerateParticipantDropOut(npart, act_id):
 avg_participation = [0.77,0.82,0.93,0.94,0.95]
     
 #%%
-activities = []
-for i in range(0,5):
-    activity = {}
-    activity['id'] = i
-    activity['name'] = activities_names[i]
-    activity['Tot. duration (hours)'] = activities_duration[i]
-    activity['times_per_week'] = activities_tperw[i]
-    activity['Tot_budget'] = activities_budget[i]
-    activity['Tot_cost'] = activities_cost[i]
-    #activity['n_beneficiaries'] = activities_npart[i]
-    activity['n_volunteers'] = activities_nvolunteers[i]
-    activity['n_staff'] = activities_nstaff[i]
-    activity['n_waitlist'] = activities_nwaitlist[i]
-    activity['beneficiary_id'] = GenerateParticipantID(TotBeneficiaries, activities_npart[i])
-    activity['beneficiary_dropout'] = GenerateParticipantDropOut(activities_npart[i],i)
-    activity['average_participation'] = avg_participation[i]
-    activities.append(activity)
-    
+
+
+data = []
+
+# Populate the list with dictionaries for each month
+for j, month in enumerate(months):
+    if j<12:
+        n_act_month = n_activities[j]
+        
+        #Create a dictionary for the current month
+        month_data = {'Month': [month] * n_act_month}
+        print(month_data)
+        month_data['Activity_id'] =  [i for i in range(len(month_data['Month']))]
+        month_data['Tot_budget'] = [activities_budget[month_data['Activity_id'][i]]+randint(-2,2)*1000 for i in range(len(month_data['Month']))]
+        month_data['Tot_cost'] = [activities_cost[month_data['Activity_id'][i]]+randint(-2,2)*random.uniform(150,200) for i in range(len(month_data['Month']))]
+        month_data['n_beneficiaries'] = [activities_npart[month_data['Activity_id'][i]]+randint(-15,0) for i in range(len(month_data['Month']))]
+        month_data['n_volunteers'] = [activities_nvolunteers[month_data['Activity_id'][i]]+randint(-2,2) for i in range(len(month_data['Month']))]
+        month_data['n_staff'] = [activities_nstaff[month_data['Activity_id'][i]]+randint(-2,2) for i in range(len(month_data['Month']))]
+        month_data['beneficiary_id'] =  [ GenerateParticipantID(TotBeneficiaries, activities_npart[month_data['Activity_id'][i]]) for i in range(len(month_data['Month']))]
+        month_data['beneficiary_dropout'] = [GenerateParticipantDropOut(activities_npart[month_data['Activity_id'][i]],i) for i in range(len(month_data['Month']))]
+        
+        # Append the dictionary to the data list
+        data.append(month_data)
+
+activities = data
+'''
+              ,'Activity_id': [i for i in range(0,5)]
+              ,'name':[activities_names[i] for i in range(0,5)]
+              ,'Tot. duration (hours)': [activities_duration[i] for i in range(5)]
+              ,'times_per_week' : [activities_tperw[i] for i in range(5)]
+              ,'Tot_budget' : [activities_budget[i] for i in range(5)]
+              ,'Tot_cost' : [activities_cost[i] for i in range(5)]
+}
+'''
+'''
+for j in range(len(months)):
+    for i in range(0,5):
+        activity = {}
+        activity['id'] = i
+        activity['name'] = activities_names[i]
+        activity['Tot. duration (hours)'] = activities_duration[i]
+        activity['times_per_week'] = activities_tperw[i]
+        activity['Tot_budget'] = activities_budget[i]
+        activity['Tot_cost'] = activities_cost[i]
+        #activity['n_beneficiaries'] = activities_npart[i]
+        activity['n_volunteers'] = activities_nvolunteers[i]
+        activity['n_staff'] = activities_nstaff[i]
+        activity['n_waitlist'] = activities_nwaitlist[i]
+        activity['beneficiary_id'] = GenerateParticipantID(TotBeneficiaries, activities_npart[i])
+        activity['beneficiary_dropout'] = GenerateParticipantDropOut(activities_npart[i],i)
+        activity['average_participation'] = avg_participation[i]
+        activities['Month'].append(activity)
+'''
 
 # %%
 df_act = pd.DataFrame.from_dict(activities)
-df_act.head()
+column_list = []
+for column in df_act.columns:
+    column_list.append(column)
+df_act_dummy = df_act.explode(column_list).reset_index(drop=True)
+
+df_act_dummy.head()
+
+
 # %%
-df_act.to_csv("data/ActivitiesTable.csv")
+df_act_dummy.to_csv("data/ActivitiesTable.csv")
 # %%
 def GenerateGender():
     rnd = random.uniform(0,1)
@@ -253,7 +295,7 @@ for i in range(0,TotBeneficiaries):
     participant['gender'] = GenerateGender()
     participant['age'] = GenerateAge()
     participant['education'] = GenerateEducation()
-    participant['employment_status'] = GenerateEmploymentStatus()
+    #participant['employment_status'] = GenerateEmploymentStatus()
     participant['start_field'] = GenerateStartField(start_fields)
     participant['end_field'] = GenerateEndField(participant['start_field'],start_fields,end_fields)
     participants.append(participant)
@@ -262,5 +304,19 @@ df_part = pd.DataFrame.from_dict(participants)
 df_part.head()
 df_part.to_csv("data/ParticipantsTable.csv")
 
-MergeTables(df_org, df_act, df_part)
+#%%
+MergeTables(df_org, df_act_dummy, df_part)
+# %%
+
+#%%
+'''
+def MergeTables(df_org, df_act_dummy, df_part):
+    df_org_dummy = df_org.explode('Activity_id')
+    df_act_dummy = df_act_dummy.explode(['beneficiary_id','beneficiary_dropout']).reset_index(drop=True)
+    df_1 = pd.merge(df_org_dummy, df_act_dummy, how="left", on=["Month","Activity_id"])
+    df_tot = pd.merge(df_1, df_part, how="left", left_on="beneficiary_id", right_on = "id")
+    return df_tot
+df_tot = MergeTables(df_org, df_act_dummy, df_part)
+df_tot.head()
+'''
 # %%
