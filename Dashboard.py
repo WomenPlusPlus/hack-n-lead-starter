@@ -1,10 +1,10 @@
-from dash import Dash, dcc, html, Input, Output
+# from dash import Dash
 import plotly.express as px
 #from MergeDatasets import *
 import matplotlib.pyplot as plt
 import pandas as pd
 import ast
-app = Dash(__name__)
+# app = Dash(__name__)
 def MergeTables(df_org, df_act, df_part):
     df_org['Activity_id'] = df_org['Activity_id'].apply(ast.literal_eval)
     df_org_dummy = df_org.explode('Activity_id').reset_index(drop=True)
