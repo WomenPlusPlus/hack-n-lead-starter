@@ -33,7 +33,7 @@ def side_bar():
         image = Image.open(logo_file)
         st.image(image)
         
-    st.title(f"{NGO_name} Impact Measure")
+    # st.title(f"{NGO_name} Impact Measure")
 
     st.sidebar.text_input("Target area (Food, Education, Poverty)")
 
