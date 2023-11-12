@@ -4,3 +4,5 @@ pandas>=2.0.3
 plotly>=5.15.0
 seaborn>=0.11.2
 matplotlib>=3.7.1
+
+conda install -c conda-forge dash
