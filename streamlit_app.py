@@ -3,9 +3,24 @@ import pandas as pd
 import plotly.express as px
 from copy import deepcopy
 import matplotlib.pyplot as plt
+from PIL import Image
 
+NGO_name =''
 # Function to display sidebar and handle file upload
 def side_bar():
+    st.sidebar.title("Tell us about your NGO project")
+
+    NGO_name = st.sidebar.text_input('NGO name')
+
+    st.title(f"{NGO_name} Impact Measure")
+
+    st.sidebar.text_input('Target area (Food, Education, Poverty)')
+
+    logo_file = st.sidebar.file_uploader("Your company logo")
+    if logo_file:
+        image = Image.open(logo_file)
+        st.image(image)
+
     st.sidebar.title("CSV Data Upload for Organization and Activities")
     st.sidebar.header("Upload your CSV Data File")
 
@@ -60,17 +75,15 @@ def side_bar():
 
 # Main application
 def main():
-    st.title("Estimate Impact of your NGO project!")
-    NGO_name = st.text_input('NGO name')
-    st.text_input('Target area (Food, Education, Poverty)')
-    st.text('Provide a CSV data set on the right')
+    # st.title("Estimate Impact of your NGO project!")
+
 
     # Load data from sidebar
     ngo_df, participant_df = side_bar()
 
+
     # Data Exploration Section
     st.header("Data Exploration")
-    st.header(f"{NGO_name} Impact Measure")
 
     # Creating a pie chart for gender distribution
     gender_pie = create_pie_chart(participant_df, 'gender', 'Gender Distribution')
