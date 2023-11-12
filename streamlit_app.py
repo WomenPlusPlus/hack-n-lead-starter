@@ -139,6 +139,11 @@ def main():
             table = Dashboard.CreateTableChangeRatio()
             table
 
+
+        st.plotly_chart(fig)
+
+        fig = Dashboard.CreateCompaniesPlot()
+
         st.plotly_chart(fig)
 
 
