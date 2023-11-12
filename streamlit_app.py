@@ -17,6 +17,14 @@ def side_bar():
     st.sidebar.write(
         "2. n_beneficiaries, n_staff, n_volunteers, n_activities, tot_duration, times_per_week, tot_cost, tot_budget, workhours (as dictionaries for each month)")
     st.sidebar.write("3. demo_beneficiaries, demo_staff, demo_volunteers (as nested dictionaries for each month)")
+
+    with open('data/OrganizationTable.csv', "rb") as file:
+        st.sidebar.download_button(
+        label="Download Example Dataset as CSV",
+        data=file,
+        file_name='data/OrganizationTable.csv',
+        mime='text/csv',
+    )
     # Add other required fields descriptions
     # Add title and header
 
